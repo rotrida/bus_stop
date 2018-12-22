@@ -1,5 +1,6 @@
 #include "bus_stop.h"
 #include "ArduinoJson.h"
+#include "https_client.h"
 #include "utils.h"
 
 std::pair<bool, unsigned int> parse_time(const String & date)
@@ -106,11 +107,10 @@ void bus_stop::set_last_error(const String & error)
 	_last_error = error;
 }
 
-bus_stop::bus_stop(const String & data):
+bus_stop::bus_stop(const String & bus_point):
+	_bus_point(bus_point),
 	_error(false)
-{
-	parse_data(data);
-}
+{}
 
 bool bus_stop::error() const
 {
@@ -125,4 +125,20 @@ String bus_stop::last_error_message() const
 const buses_map & bus_stop::next_buses() const
 {
 	return _next_buses;
+}
+
+bool bus_stop::request_data()
+{
+	_error = false;
+	String url = "api.tfl.gov.uk/StopPoint/" + _bus_point + "/Arrivals";
+	
+	https_client bus_client(url, 443);
+
+    if(!bus_client.execute())
+    {
+		set_last_error("Error requesting buses arrival.");
+		return false;
+	}
+
+	return parse_data(bus_client.get_response());
 }

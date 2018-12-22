@@ -11,6 +11,7 @@ class bus_stop
 private:
 
 	bool _error;
+	String _bus_point;
 	String _last_error;
 	
 	buses_map _next_buses;
@@ -20,10 +21,11 @@ private:
 
 public:
 
-	bus_stop(const String & data);
+	bus_stop(const String & bus_point);
 	
 	bool error() const;
 	String last_error_message() const;
 	
+	bool request_data();
 	const buses_map & next_buses() const;
 };
